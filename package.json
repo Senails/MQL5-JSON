@@ -1,0 +1,22 @@
+{
+  "name": "mql5-json",
+  "version": "0.0.1",
+  "description": "JSON parcing and serialization for MQL5 lang",
+  "main": "JSON.mqh",
+  "scripts": {},
+  "keywords": [
+    "MQL5",
+    "JSON",
+    "MQL5 JSON"
+  ],
+  "author": "Kuzma Shevelev",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HommaTech/mql-simplify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HommaTech/mql-simplify/issues",
+    "email": "seffele@gmail.com"
+  }
+}
