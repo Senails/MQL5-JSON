@@ -1,80 +1,127 @@
 class JSON {
+    class Object;
+    class Array;
     class JsonValueItem;
-    class Array;  
     enum JSONValueItemTypes { JSONStringType, JSONNumberType, JSONBoolType, JSONObjetType, JSONArrayType, JSONUndefinedType };
 public:
-    JSON() {
-        ArrayResize(this.jsonValueItemsArray, 0, 10);
-    };
-    JSON(string &json) {
-        ArrayResize(this.jsonValueItemsArray, 0, 10);
-        int parceJsonCharCounter = 0;
-        bool isSuccess = true;
-        JSON::_parseJSONObject(json, parceJsonCharCounter, isSuccess, &this);
-        if (!isSuccess) this._clearResources();
-    };
+    class Object {
+    public:
+        Object() {
+            ArrayResize(this._jsonValueItemsArray, 0, 10);
+        };
+        Object(string &json) {
+            ArrayResize(this._jsonValueItemsArray, 0, 10);
+            int parceJsonCharCounter = 0;
+            bool isSuccess = true;
+            JSON::_parseJSONObject(json, parceJsonCharCounter, isSuccess, &this);
+            if (!isSuccess) this._clearResources();
+        };
 
-    JSON* setProperty(string key, string value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, int value)                { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, long value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, double value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, bool value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, JSON* value)              { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, JSON::Array* value)       { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, string value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, int value)                { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, long value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, double value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, bool value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, JSON::Object* value)      { return this._setProperty(key, new JsonValueItem(key, value)); }
+        JSON::Object* setProperty(string key, JSON::Array* value)       { return this._setProperty(key, new JsonValueItem(key, value)); }
 
-    bool isBoolean(string key) const                        { return this._getPropertyType(key) == JSONBoolType; }
-    bool isNumber(string key) const                         { return this._getPropertyType(key) == JSONNumberType; }
-    bool isString(string key) const                         { return this._getPropertyType(key) == JSONStringType; }
-    bool isObject(string key) const                         { return this._getPropertyType(key) == JSONObjetType; }
-    bool isArray(string key) const                          { return this._getPropertyType(key) == JSONArrayType; }
+        bool hasValue(string key) const                                 { return this._getPropertyType(key) != JSONUndefinedType; }
+        bool isBoolean(string key) const                                { return this._getPropertyType(key) == JSONBoolType; }
+        bool isNumber(string key) const                                 { return this._getPropertyType(key) == JSONNumberType; }
+        bool isString(string key) const                                 { return this._getPropertyType(key) == JSONStringType; }
+        bool isObject(string key) const                                 { return this._getPropertyType(key) == JSONObjetType; }
+        bool isArray(string key) const                                  { return this._getPropertyType(key) == JSONArrayType; }
 
-    string getString(string key) const {
-       const JsonValueItem* item = this._getProperty(key);
-       if (item == NULL || item.valueType != JSONStringType) return "";
-       return item.stringValue;
-    }
-    double getNumber(string key) const {
-       const JsonValueItem* item = this._getProperty(key);
-       if (item == NULL || item.valueType != JSONNumberType) return 0.0;
-       return item.doubleValue;
-    }
-    bool getBoolean(string key) const {
-       const JsonValueItem* item = this._getProperty(key);
-       if (item == NULL || item.valueType != JSONBoolType) return false;
-       return item.booleanValue;
-    }
-    JSON* getObject(string key) const {
-       const JsonValueItem* item = this._getProperty(key);
-       if (item == NULL || item.valueType != JSONObjetType) return NULL;
-       return item.objectValue;
-    }
-    JSON::Array* getArray(string key) const {
-       const JsonValueItem* item = this._getProperty(key);
-       if (item == NULL || item.valueType != JSONArrayType) return NULL;
-       return item.arrayValue;
-    }
-
-    string toString() const {
-        int arraySize = ArraySize(this.jsonValueItemsArray);
-        string result = "";
-
-        for (int i = 0; i < arraySize; i++) {
-            const JsonValueItem* item = this.jsonValueItemsArray[i];
-            result += "\""+ item.key +"\": " + item.toString() + (i < arraySize -1 ? "," : "");
+        string getString(string key) const {
+            const JsonValueItem* item = this._getProperty(key);
+            if (item == NULL || item.valueType != JSONStringType) return "";
+            return item.stringValue;
+        }
+        double getNumber(string key) const {
+            const JsonValueItem* item = this._getProperty(key);
+            if (item == NULL || item.valueType != JSONNumberType) return 0.0;
+            return item.doubleValue;
+        }
+        bool getBoolean(string key) const {
+            const JsonValueItem* item = this._getProperty(key);
+            if (item == NULL || item.valueType != JSONBoolType) return false;
+            return item.booleanValue;
+        }
+        JSON::Object* getObject(string key) const {
+            const JsonValueItem* item = this._getProperty(key);
+            if (item == NULL || item.valueType != JSONObjetType) return NULL;
+            return item.objectValue;
+        }
+        JSON::Array* getArray(string key) const {
+            const JsonValueItem* item = this._getProperty(key);
+            if (item == NULL || item.valueType != JSONArrayType) return NULL;
+            return item.arrayValue;
+        }
+        void getKeysToArray(string &array[]) const {
+            ArrayResize(array, ArraySize(this._jsonValueItemsArray));
+            for (int i = 0; i < ArraySize(this._jsonValueItemsArray); array[i] = this._jsonValueItemsArray[i].key, i++);
         }
 
-        return "{" + result + "}";
-    }
+        string toString() const {
+            int arraySize = ArraySize(this._jsonValueItemsArray);
+            string result = "";
 
-    ~JSON() { this._clearResources(); }
+            for (int i = 0; i < arraySize; i++) {
+                const JsonValueItem* item = this._jsonValueItemsArray[i];
+                result += "\""+ item.key +"\": " + item.toString() + (i < arraySize -1 ? "," : "");
+            }
+
+            return "{" + result + "}";
+        }
+
+        ~Object() { this._clearResources(); }
+    private:
+        const JsonValueItem* _jsonValueItemsArray[];
+
+        JSON::Object* _setProperty(string key, const JsonValueItem* valueItem) {
+            int arraySize = ArraySize(this._jsonValueItemsArray);
+
+            for (int i = 0; i < arraySize; i++) {
+                if (this._jsonValueItemsArray[i].key == key) {
+                    delete this._jsonValueItemsArray[i];
+                    this._jsonValueItemsArray[i] = valueItem;
+                    return &this;
+                }
+            }
+
+            ArrayResize(this._jsonValueItemsArray, arraySize + 1, 10);
+            this._jsonValueItemsArray[arraySize] = valueItem;
+            return &this;
+        }
+        const JsonValueItem* _getProperty(string key) const {
+            for (int i = 0; i < ArraySize(this._jsonValueItemsArray); i++) {
+                if (this._jsonValueItemsArray[i].key == key) {
+                    return this._jsonValueItemsArray[i];
+                }
+            }
+            return NULL;
+        }
+        JSONValueItemTypes _getPropertyType(string key) const {
+            for (int i = 0; i < ArraySize(this._jsonValueItemsArray); i++) {
+                if (this._jsonValueItemsArray[i].key == key) {
+                    return this._jsonValueItemsArray[i].valueType;
+                }
+            }
+            return JSONUndefinedType;
+        }
+        void _clearResources() {
+            for (int i = 0; i < ArraySize(this._jsonValueItemsArray); i++) delete this._jsonValueItemsArray[i];
+            ArrayResize(this._jsonValueItemsArray, 0);
+        }
+    };
 
     class Array {
     public:
         Array() {
-            ArrayResize(this.jsonValueItemsArrayOfArray, 0, 10);
+            ArrayResize(this._jsonValueItemsArray, 0, 10);
         };
         Array(string &json) {
-            ArrayResize(this.jsonValueItemsArrayOfArray, 0, 10);
+            ArrayResize(this._jsonValueItemsArray, 0, 10);
             int parceJsonCharCounter = 0;
             bool isSuccess = true;
             JSON::_parseJSONArray(json, parceJsonCharCounter, isSuccess, &this);
@@ -86,7 +133,7 @@ public:
         Array* add(long value)               { return this._add(new JsonValueItem("", value)); }
         Array* add(double value)             { return this._add(new JsonValueItem("", value)); }
         Array* add(bool value)               { return this._add(new JsonValueItem("", value)); }
-        Array* add(JSON* value)              { return this._add(new JsonValueItem("", value)); }
+        Array* add(JSON::Object* value)      { return this._add(new JsonValueItem("", value)); }
         Array* add(JSON::Array* value)       { return this._add(new JsonValueItem("", value)); }
 
         bool isBoolean(int index) const      { return this._getPropertyType(index) == JSONBoolType; }
@@ -96,40 +143,40 @@ public:
         bool isArray(int index) const        { return this._getPropertyType(index) == JSONArrayType; }
 
         string getString(int index) const {
-            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONStringType) return "";
             return item.stringValue;
         }
         double getNumber(int index) const {
-            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONNumberType) return 0.0;
             return item.doubleValue;
         }
         bool getBoolean(int index) const {
-            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONBoolType) return false;
             return item.booleanValue;
         }
-        JSON* getObject(int index) const {
-            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+        JSON::Object* getObject(int index) const {
+            const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONObjetType) return NULL;
             return item.objectValue;
         }
         JSON::Array* getArray(int index) const {
-            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONArrayType) return NULL;
             return item.arrayValue;
         }
         int getLength() const {
-            return ArraySize(jsonValueItemsArrayOfArray);
+            return ArraySize(_jsonValueItemsArray);
         }
 
         string toString() const {
-            int arraySize = ArraySize(this.jsonValueItemsArrayOfArray);
+            int arraySize = ArraySize(this._jsonValueItemsArray);
             string result = "";
 
             for (int i = 0; i < arraySize; i++) {
-                const JsonValueItem* item = this.jsonValueItemsArrayOfArray[i];
+                const JsonValueItem* item = this._jsonValueItemsArray[i];
                 result += item.toString() + (i < arraySize -1 ? "," : "");
             }
 
@@ -138,61 +185,28 @@ public:
 
         ~Array() { this._clearResources(); }
     private:
-        JsonValueItem* jsonValueItemsArrayOfArray[];
+        JsonValueItem* _jsonValueItemsArray[];
 
         Array* _add(JsonValueItem* elem) {
-            int arraySize = ArraySize(this.jsonValueItemsArrayOfArray);
-            ArrayResize(this.jsonValueItemsArrayOfArray, arraySize + 1, 10);
-            jsonValueItemsArrayOfArray[arraySize] = elem;
+            int arraySize = ArraySize(this._jsonValueItemsArray);
+            ArrayResize(this._jsonValueItemsArray, arraySize + 1, 10);
+            _jsonValueItemsArray[arraySize] = elem;
             return &this;
         }
         JSONValueItemTypes _getPropertyType(int index) const {
-            if (index >= ArraySize(this.jsonValueItemsArrayOfArray)) return JSONUndefinedType;
-            return this.jsonValueItemsArrayOfArray[index].valueType;
+            if (index >= ArraySize(this._jsonValueItemsArray)) return JSONUndefinedType;
+            return this._jsonValueItemsArray[index].valueType;
         }
         void _clearResources() {
-            for (int i = 0; i < ArraySize(this.jsonValueItemsArrayOfArray); i++) delete this.jsonValueItemsArrayOfArray[i];
-            ArrayResize(this.jsonValueItemsArrayOfArray, 0);
+            for (int i = 0; i < ArraySize(this._jsonValueItemsArray); i++) delete this._jsonValueItemsArray[i];
+            ArrayResize(this._jsonValueItemsArray, 0);
         }
     };
 
 private:
-    const JsonValueItem* jsonValueItemsArray[];
+    JSON() {}
 
-    JSON* _setProperty(string key, const JsonValueItem* valueItem) {
-        int arraySize = ArraySize(this.jsonValueItemsArray);
-
-        for (int i = 0; i < arraySize; i++) {
-            if (this.jsonValueItemsArray[i].key == key) {
-                delete this.jsonValueItemsArray[i];
-                this.jsonValueItemsArray[i] = valueItem;
-                return &this;
-            }
-        }
-
-        ArrayResize(this.jsonValueItemsArray, arraySize + 1, 10);
-        this.jsonValueItemsArray[arraySize] = valueItem;
-        return &this;
-    }
-
-    const JsonValueItem* _getProperty(string key) const {
-        for (int i = 0; i < ArraySize(this.jsonValueItemsArray); i++) {
-            if (this.jsonValueItemsArray[i].key == key) {
-                return this.jsonValueItemsArray[i];
-            }
-        }
-        return NULL;
-    }
-    JSONValueItemTypes _getPropertyType(string key) const {
-        for (int i = 0; i < ArraySize(this.jsonValueItemsArray); i++) {
-            if (this.jsonValueItemsArray[i].key == key) {
-                return this.jsonValueItemsArray[i].valueType;
-            }
-        }
-        return JSONUndefinedType;
-    }
-
-    static void _parseJSONObject(const string &json, int &i, bool &isSuccess, JSON* object) {
+    static void _parseJSONObject(const string &json, int &i, bool &isSuccess, JSON::Object* object) {
         JSON::_skipWhitespace(json, i);
         while (i < StringLen(json) && json[i++] != '{'); // skip '{'
         JSON::_skipWhitespace(json, i);
@@ -386,8 +400,8 @@ private:
         isSuccess = false;
         return "";
     }
-    static JSON* _parseObject(const string &json, int &i, bool &isSuccess) {
-        JSON* childObject = new JSON();
+    static JSON::Object* _parseObject(const string &json, int &i, bool &isSuccess) {
+        JSON::Object* childObject = new JSON::Object();
         JSON::_parseJSONObject(json, i, isSuccess, childObject);
         return childObject;
     }
@@ -395,11 +409,6 @@ private:
         JSON::Array* childObject = new JSON::Array();
         JSON::_parseJSONArray(json, i, isSuccess, childObject);
         return childObject;
-    }
-
-    void _clearResources() {
-        for (int i = 0; i < ArraySize(this.jsonValueItemsArray); i++) delete this.jsonValueItemsArray[i];
-        ArrayResize(this.jsonValueItemsArray, 0);
     }
 
     class JsonValueItem {
@@ -410,7 +419,7 @@ private:
             string stringValue;
             double doubleValue;
             bool booleanValue;
-            JSON* objectValue;
+            JSON::Object* objectValue;
             JSON::Array* arrayValue;
 
             JsonValueItem(string k, string value): key(k), valueType(JSONStringType), stringValue(value) {};
@@ -418,7 +427,7 @@ private:
             JsonValueItem(string k, long value): key(k), valueType(JSONNumberType), doubleValue(double(value)) {};
             JsonValueItem(string k, double value): key(k), valueType(JSONNumberType), doubleValue(value) {};
             JsonValueItem(string k, bool value): key(k), valueType(JSONBoolType), booleanValue(value) {};
-            JsonValueItem(string k, JSON* value): key(k), valueType(JSONObjetType), objectValue(value) {};
+            JsonValueItem(string k, JSON::Object* value): key(k), valueType(JSONObjetType), objectValue(value) {};
             JsonValueItem(string k, JSON::Array* value): key(k), valueType(JSONArrayType), arrayValue(value) {};
 
             string toString() const {
@@ -431,7 +440,7 @@ private:
                     StringReplace(copy, "\"","\\\"");
                     return "\"" + copy + "\"";
                 }
-                return ""; // JSONUndefinedType never returns
+                return ""; // JSONUndefinedType , never returns
             }
 
             ~JsonValueItem() {
