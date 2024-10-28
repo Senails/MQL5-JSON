@@ -9,13 +9,12 @@
     "JSON",
     "MQL5 JSON"
   ],
-  "author": "Kuzma Shevelev",
+  "author": "Kuzma Shevelev (seffele@gmail.com)",
   "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/Senails/mql5-json",
-    "author": "https://github.com/Senails",
-    "email": "seffele@gmail.com"
+    "author": "https://github.com/Senails"
   },
   "bugs": {
     "url": "https://github.com/HommaTech/mql-simplify/issues",
