@@ -1,4 +1,7 @@
 class JSON {
+    class JsonValueItem;
+    class Array;  
+    enum JSONValueItemTypes { JSONStringType, JSONNumberType, JSONBoolType, JSONObjetType, JSONArrayType, JSONUndefinedType };
 public:
     JSON() {
         ArrayResize(this.jsonValueItemsArray, 0, 10);
@@ -6,7 +9,8 @@ public:
     JSON(string &json) {
         ArrayResize(this.jsonValueItemsArray, 0, 10);
         int parceJsonCharCounter = 0;
-        bool isSuccess = this._parseJSON(json, parceJsonCharCounter);
+        bool isSuccess = true;
+        JSON::_parseJSONObject(json, parceJsonCharCounter, isSuccess, &this);
         if (!isSuccess) this._clearResources();
     };
 
@@ -16,22 +20,13 @@ public:
     JSON* setProperty(string key, double value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
     JSON* setProperty(string key, bool value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
     JSON* setProperty(string key, JSON* value)              { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, string &value[])          { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, int &value[])             { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, long &value[])            { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, double &value[])          { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, bool &value[])            { return this._setProperty(key, new JsonValueItem(key, value)); }
-    JSON* setProperty(string key, JSON* &value[])           { return this._setProperty(key, new JsonValueItem(key, value)); }
+    JSON* setProperty(string key, JSON::Array* value)       { return this._setProperty(key, new JsonValueItem(key, value)); }
 
     bool isBoolean(string key) const                        { return this._getPropertyType(key) == JSONBoolType; }
     bool isNumber(string key) const                         { return this._getPropertyType(key) == JSONNumberType; }
     bool isString(string key) const                         { return this._getPropertyType(key) == JSONStringType; }
     bool isObject(string key) const                         { return this._getPropertyType(key) == JSONObjetType; }
     bool isArray(string key) const                          { return this._getPropertyType(key) == JSONArrayType; }
-    bool isBooleanArray(string key, int index = 0) const    { return this._getArrayPropertyType(key, index) == JSONBoolType; }
-    bool isNumberArray(string key, int index = 0) const     { return this._getArrayPropertyType(key, index) == JSONNumberType; }
-    bool isStringArray(string key, int index = 0) const     { return this._getArrayPropertyType(key, index) == JSONStringType; }
-    bool isObjectArray(string key, int index = 0) const     { return this._getArrayPropertyType(key, index) == JSONObjetType; }
 
     string getString(string key) const {
        const JsonValueItem* item = this._getProperty(key);
@@ -53,32 +48,10 @@ public:
        if (item == NULL || item.valueType != JSONObjetType) return NULL;
        return item.objectValue;
     }
-
-    int getArrayLenght(string key) const {
-        const JsonValueItem* item = this._getProperty(key);
-        if (item == NULL || item.valueType != JSONArrayType) return 0;
-        return item.arrayLenght;
-    }
-
-    string getStringFromArray(string key, int index) const {
-       const JsonValueItem* item = this._getPropertyFromArray(key, index);
-       if (item == NULL || item.valueType != JSONStringType) return "";
-       return item.stringValue;
-    }
-    double getNumberFromArray(string key, int index) const {
-       const JsonValueItem* item = this._getPropertyFromArray(key, index);
-       if (item == NULL || item.valueType != JSONNumberType) return 0.0;
-       return item.doubleValue;
-    }
-    bool getBooleanFromArray(string key, int index) const {
-       const JsonValueItem* item = this._getPropertyFromArray(key, index);
-       if (item == NULL || item.valueType != JSONBoolType) return false;
-       return item.booleanValue;
-    }
-    JSON* getObjectFromArray(string key, int index) const {
-       const JsonValueItem* item = this._getPropertyFromArray(key, index);
-       if (item == NULL || item.valueType != JSONObjetType) return NULL;
-       return item.objectValue;
+    JSON::Array* getArray(string key) const {
+       const JsonValueItem* item = this._getProperty(key);
+       if (item == NULL || item.valueType != JSONArrayType) return NULL;
+       return item.arrayValue;
     }
 
     string toString() const {
@@ -93,21 +66,98 @@ public:
         return "{" + result + "}";
     }
 
-    ~JSON() {
-        this._clearResources();
-    }
+    ~JSON() { this._clearResources(); }
+
+    class Array {
+    public:
+        Array() {
+            ArrayResize(this.jsonValueItemsArrayOfArray, 0, 10);
+        };
+        Array(string &json) {
+            ArrayResize(this.jsonValueItemsArrayOfArray, 0, 10);
+            int parceJsonCharCounter = 0;
+            bool isSuccess = true;
+            JSON::_parseJSONArray(json, parceJsonCharCounter, isSuccess, &this);
+            if (!isSuccess) this._clearResources();
+        };
+
+        Array* add(string value)             { return this._add(new JsonValueItem("", value)); }
+        Array* add(int value)                { return this._add(new JsonValueItem("", value)); }
+        Array* add(long value)               { return this._add(new JsonValueItem("", value)); }
+        Array* add(double value)             { return this._add(new JsonValueItem("", value)); }
+        Array* add(bool value)               { return this._add(new JsonValueItem("", value)); }
+        Array* add(JSON* value)              { return this._add(new JsonValueItem("", value)); }
+        Array* add(JSON::Array* value)       { return this._add(new JsonValueItem("", value)); }
+
+        bool isBoolean(int index) const      { return this._getPropertyType(index) == JSONBoolType; }
+        bool isNumber(int index) const       { return this._getPropertyType(index) == JSONNumberType; }
+        bool isString(int index) const       { return this._getPropertyType(index) == JSONStringType; }
+        bool isObject(int index) const       { return this._getPropertyType(index) == JSONObjetType; }
+        bool isArray(int index) const        { return this._getPropertyType(index) == JSONArrayType; }
+
+        string getString(int index) const {
+            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            if (item == NULL || item.valueType != JSONStringType) return "";
+            return item.stringValue;
+        }
+        double getNumber(int index) const {
+            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            if (item == NULL || item.valueType != JSONNumberType) return 0.0;
+            return item.doubleValue;
+        }
+        bool getBoolean(int index) const {
+            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            if (item == NULL || item.valueType != JSONBoolType) return false;
+            return item.booleanValue;
+        }
+        JSON* getObject(int index) const {
+            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            if (item == NULL || item.valueType != JSONObjetType) return NULL;
+            return item.objectValue;
+        }
+        JSON::Array* getArray(int index) const {
+            const JsonValueItem* item = this.jsonValueItemsArrayOfArray[index];
+            if (item == NULL || item.valueType != JSONArrayType) return NULL;
+            return item.arrayValue;
+        }
+        int getLength() const {
+            return ArraySize(jsonValueItemsArrayOfArray);
+        }
+
+        string toString() const {
+            int arraySize = ArraySize(this.jsonValueItemsArrayOfArray);
+            string result = "";
+
+            for (int i = 0; i < arraySize; i++) {
+                const JsonValueItem* item = this.jsonValueItemsArrayOfArray[i];
+                result += item.toString() + (i < arraySize -1 ? "," : "");
+            }
+
+            return "[" + result + "]";
+        }
+
+        ~Array() { this._clearResources(); }
+    private:
+        JsonValueItem* jsonValueItemsArrayOfArray[];
+
+        Array* _add(JsonValueItem* elem) {
+            int arraySize = ArraySize(this.jsonValueItemsArrayOfArray);
+            ArrayResize(this.jsonValueItemsArrayOfArray, arraySize + 1, 10);
+            jsonValueItemsArrayOfArray[arraySize] = elem;
+            return &this;
+        }
+        JSONValueItemTypes _getPropertyType(int index) const {
+            if (index >= ArraySize(this.jsonValueItemsArrayOfArray)) return JSONUndefinedType;
+            return this.jsonValueItemsArrayOfArray[index].valueType;
+        }
+        void _clearResources() {
+            for (int i = 0; i < ArraySize(this.jsonValueItemsArrayOfArray); i++) delete this.jsonValueItemsArrayOfArray[i];
+            ArrayResize(this.jsonValueItemsArrayOfArray, 0);
+        }
+    };
+
 private:
-    class JsonValueItem;
-    enum JSONValueItemTypes { JSONStringType, JSONNumberType, JSONBoolType, JSONObjetType, JSONArrayType, JSONUndefinedType };
-
     const JsonValueItem* jsonValueItemsArray[];
-
-    void _JSON(const string &json) {
-        ArrayResize(this.jsonValueItemsArray, 0, 10);
-        int parceJsonCharCounter = 0;
-        bool isSuccess = this._parseJSON(json, parceJsonCharCounter);
-        if (!isSuccess) this._clearResources();
-    }
 
     JSON* _setProperty(string key, const JsonValueItem* valueItem) {
         int arraySize = ArraySize(this.jsonValueItemsArray);
@@ -133,11 +183,6 @@ private:
         }
         return NULL;
     }
-    const JsonValueItem* _getPropertyFromArray(string key, int index) const {
-        const JsonValueItem* item = this._getProperty(key);
-        if (item == NULL || item.valueType != JSONArrayType || index >= item.arrayLenght) return NULL;
-        return item.arrayValue[index];
-    }
     JSONValueItemTypes _getPropertyType(string key) const {
         for (int i = 0; i < ArraySize(this.jsonValueItemsArray); i++) {
             if (this.jsonValueItemsArray[i].key == key) {
@@ -146,108 +191,128 @@ private:
         }
         return JSONUndefinedType;
     }
-    JSONValueItemTypes _getArrayPropertyType(string key, int index) const {
-        for (int i = 0; i < ArraySize(this.jsonValueItemsArray); i++) {
-            if (this.jsonValueItemsArray[i].key == key) {
-                const JsonValueItem* item = this.jsonValueItemsArray[i];
-                return item.valueType == JSONArrayType && item.arrayLenght > index
-                    ? item.arrayValue[0].valueType
-                    : JSONUndefinedType;
-            }
-        }
-        return JSONUndefinedType;
-    }
-    
-    bool _parseJSON(const string &json, int &i) {
-        int len = StringLen(json);
-        bool isSuccess = true;
 
-        this._skipWhitespace(json, i);
-        while (i < len && json[i++] != '{'); // Пропустить начальный символ '{'
-        this._skipWhitespace(json, i);
+    static void _parseJSONObject(const string &json, int &i, bool &isSuccess, JSON* object) {
+        JSON::_skipWhitespace(json, i);
+        while (i < StringLen(json) && json[i++] != '{'); // skip '{'
+        JSON::_skipWhitespace(json, i);
 
-        while (i < len) {
-            this._skipWhitespace(json, i);
+        while (i < StringLen(json)) {
+            JSON::_skipWhitespace(json, i);
 
-            string key = this._parseKey(json, i, isSuccess);
-            if (!isSuccess) return false;
+            string key = JSON::_parseKey(json, i, isSuccess);
+            if (!isSuccess) return;
 
-            this._skipWhitespace(json, i);
-            if (json[i++] != ':') return false; // Ожидаем ':' после ключа
-            this._skipWhitespace(json, i);
+            JSON::_skipWhitespace(json, i);
+            if (json[i++] != ':') isSuccess = false; // wait ':'
+            if (!isSuccess) return;
+            JSON::_skipWhitespace(json, i);
 
-            if (this._isDigit(json[i]) || json[i] == '-') {
-                this.setProperty(key, this._parseNumber(json, i, isSuccess));
+            if (JSON::_isDigit(json[i]) || json[i] == '-') {
+                object.setProperty(key, JSON::_parseNumber(json, i, isSuccess));
             } else if (json[i] == 'n' || json[i] == 'N') {
-                this.setProperty(key, this._parseNull(json, i, isSuccess));
+                object.setProperty(key, JSON::_parseNull(json, i, isSuccess));
             } else if (json[i] == 't' || json[i] == 'f') {
-                this.setProperty(key, this._parseBoolean(json, i, isSuccess));
+                object.setProperty(key, JSON::_parseBoolean(json, i, isSuccess));
             } else if (json[i] == '"') {
-                this.setProperty(key, this._parseString(json, i, isSuccess));
+                object.setProperty(key, JSON::_parseString(json, i, isSuccess));
             } else if (json[i] == '{') {
-                this.setProperty(key, this._parseObject(json, i, isSuccess));
+                object.setProperty(key, JSON::_parseObject(json, i, isSuccess));
             } else if (json[i] == '[') {
-                this._setProperty(key, this._parseArray(json, i, isSuccess, key));
+                object.setProperty(key, JSON::_parseArray(json, i, isSuccess));
             }
             if (!isSuccess) break;
 
-            this._skipWhitespace(json, i);
-            if (json[i] == ',') { // Проверяем, есть ли следующая запятая
+            JSON::_skipWhitespace(json, i);
+            if (json[i] == ',') {
                 i++;
                 continue;
             } else if (json[i] == '}') {
                 i++;
-                break; // если конец строки то мы закончили 
+                break; // end 
             } else {
-                isSuccess = false; // Если не закрывающая фигурная скобка, это ошибка
+                isSuccess = false;
             }
         }
-
-        return isSuccess;
     }
-    bool _isDigit(ushort ch) const {
+    static void _parseJSONArray(const string &json, int &i, bool &isSuccess, JSON::Array* arrayObject) {
+        JSON::_skipWhitespace(json, i);
+        while (i < StringLen(json) && json[i++] != '['); // skip '['
+        JSON::_skipWhitespace(json, i);
+    
+        while (i < StringLen(json)) {
+            JSON::_skipWhitespace(json, i);
+
+            // check value type
+            if (JSON::_isDigit(json[i]) || json[i] == '-') {
+                arrayObject.add(JSON::_parseNumber(json, i, isSuccess));
+            } else if (json[i] == '"') {
+                arrayObject.add(JSON::_parseString(json, i, isSuccess));
+            } else if (json[i] == 'n' || json[i] == 'N') {
+                arrayObject.add(JSON::_parseNull(json, i, isSuccess));
+            } else if (json[i] == 't' || json[i] == 'f') {
+                arrayObject.add(JSON::_parseBoolean(json, i, isSuccess));
+            } else if (json[i] == '{') {
+                arrayObject.add(JSON::_parseObject(json, i, isSuccess));
+            } else if (json[i] == '[') {
+                arrayObject.add(JSON::_parseArray(json, i, isSuccess));
+            }
+            if (!isSuccess) break;
+
+            JSON::_skipWhitespace(json, i);
+            if (json[i] == ',') {
+                i++; // skip ','
+            } else if (json[i] == ']') {
+                i++;
+                break; // end
+            } else {
+                isSuccess = false;
+                break;
+            }
+        }
+    }
+    static bool _isDigit(ushort ch) {
         return (ch >= '0' && ch <= '9');
     }
-    void _skipWhitespace(const string &json, int &i) const {
+    static void _skipWhitespace(const string &json, int &i) {
         while (i < StringLen(json) && (json[i] == ' ' || json[i] == '\n' || json[i] == '\r' || json[i] == '\t')) i++;
     }
-    string _parseKey(const string &json, int &i, bool &isSuccess) const {
-        if (i < StringLen(json) && json[i] == '"') { // Проверка на наличие открывающей кавычки
-            i++;  // Пропустить открывающую кавычку
+    static string _parseKey(const string &json, int &i, bool &isSuccess) {
+        if (i < StringLen(json) && json[i] == '"') {
+            i++;  // skip '"'
             string key = "";
 
-            // Считываем символы до закрывающей кавычки
             while (i < StringLen(json) && json[i] != '"') key += ShortToString(json[i++]);
-            if (i < StringLen(json) && json[i] == '"') { // Проверка закрывающей кавычки
-                i++;  // Пропустить закрывающую кавычку
+            if (i < StringLen(json) && json[i] == '"') { // check end '"'
+                i++;  // skip '"'
                 return key;
             }
         }
 
-        isSuccess = false; // Если не удалось найти ключ
+        isSuccess = false;
         return "";
     }
-    double _parseNumber(const string &json, int &i, bool &isSuccess) const {
+    static double _parseNumber(const string &json, int &i, bool &isSuccess) {
         string numberStr = "";
         bool isNegative = false;
 
-        if (json[i] == '-') { // Проверка на отрицательное значение
+        if (json[i] == '-') {
             isNegative = true;
             i++;
         }
 
-        while (i < StringLen(json) && this._isDigit(json[i])) { // Чтение целой части числа
+        while (i < StringLen(json) && JSON::_isDigit(json[i])) {
             numberStr += ShortToString(json[i++]);
         }
 
-        if (i < StringLen(json) && json[i] == '.') { // Чтение дробной части, если есть
-            numberStr += ShortToString(json[i++]); // Добавить точку
-            while (i < StringLen(json) && this._isDigit(json[i])) {
+        if (i < StringLen(json) && json[i] == '.') {
+            numberStr += ShortToString(json[i++]);
+            while (i < StringLen(json) && JSON::_isDigit(json[i])) {
                 numberStr += ShortToString(json[i++]);
             }
         }
 
-        if (StringLen(numberStr) > 0) { // Конвертация строки в число
+        if (StringLen(numberStr) > 0) {
             double result = StringToDouble(numberStr);
             return isNegative ? -result : result;
         }
@@ -255,16 +320,16 @@ private:
         isSuccess = false;
         return 0.0;
     }
-    string _parseString(const string &json, int &i, bool &isSuccess) const {
+    static string _parseString(const string &json, int &i, bool &isSuccess) {
         string result = "";
-        i++; // Пропускаем открывающую кавычку
+        i++; // skip '"'
 
         while (i < StringLen(json)) {
-            if (json[i] == '"') { // Если встречаем закрывающую кавычку
-                i++; // Пропускаем закрывающую кавычку
-                return result; // Возвращаем собранную строку
-            } else if (json[i] == '\\') { // Проверяем на escape-последовательность
-                i++; // Пропускаем символ '\'
+            if (json[i] == '"') { // if end of string
+                i++; // skip '"'
+                return result;
+            } else if (json[i] == '\\') { // check escape
+                i++; // // skip '\'
                 if (i < StringLen(json)) {
                     switch (json[i]) {
                         case 'n': result += "\n"; break;
@@ -272,103 +337,64 @@ private:
                         case 'r': result += "\r"; break;
                         case '"': result += "\""; break;
                         case '\\': result += "\\"; break;
-                        default: // Игнорируем неизвестные escape-последовательности
+                        default:
                             isSuccess = false;
                             return "";
                     }
                 }
             } else {
-                result += ShortToString(json[i]); // Добавляем обычный символ в строку
+                result += ShortToString(json[i]);
             }
             
-            i++; // Переходим к следующему символу
+            i++; // next char
         }
 
-        // Если мы достигли конца строки, и не нашли закрывающую кавычку
+        // not find end '"'
         isSuccess = false;
         return "";
     }
-    bool _parseBoolean(const string &json, int &i, bool &isSuccess) const {
-        // Проверяем, соответствует ли подстрока "true" или "false" в любом регистре
+    static bool _parseBoolean(const string &json, int &i, bool &isSuccess) {
         if (StringLen(json) >= i + 4) {
             string substringTrue = StringSubstr(json, i, 4);
             StringToLower(substringTrue);
             if (substringTrue == "true") {
-                i += 4; // Пропустить "true"
-                return true; // Успешно разобрано
+                i += 4;
+                return true;
             }
         }
         if (StringLen(json) >= i + 5) {
             string substringFalse = StringSubstr(json, i, 5);
             StringToLower(substringFalse);
             if (substringFalse == "false") {
-                i += 5; // Пропустить "false"
-                return false; // Успешно разобрано
+                i += 5;
+                return false;
             }
         }
-        isSuccess = false; // Не соответствует "true" или "false"
+        isSuccess = false;
         return false;
     }
-    string _parseNull(const string &json, int &i, bool &isSuccess) const {
-        // Проверяем, соответствует ли подстрока "null" в любом регистре
+    static string _parseNull(const string &json, int &i, bool &isSuccess) {
         if (StringLen(json) >= i + 4) {
             string substring = StringSubstr(json, i, 4);
             StringToLower(substring);
 
             if (substring == "null") {
-                i += 4; // Пропустить "null"
-                return "null"; // Успешно разобрано
+                i += 4;
+                return "null";
             }
         }
-        isSuccess = false; // Не соответствует "true" или "false"
+        isSuccess = false;
         return "";
     }
-    JSON* _parseObject(const string &json, int &i, bool &isSuccess) const {
+    static JSON* _parseObject(const string &json, int &i, bool &isSuccess) {
         JSON* childObject = new JSON();
-        isSuccess = childObject._parseJSON(json, i);
+        JSON::_parseJSONObject(json, i, isSuccess, childObject);
         return childObject;
     }
-    JsonValueItem* _parseArray(const string &json, int &i, bool &isSuccess, string key) const {
-        JsonValueItem* childElements[];
-        ArrayResize(childElements, 0, 20);
-        int itemCounter = 0;
-        i++; // пропускам '['
-    
-        while (i < StringLen(json)) {
-            this._skipWhitespace(json, i);
-
-            // Распознаем тип элемента массива
-            if (this._isDigit(json[i]) || json[i] == '-') {
-                ArrayResize(childElements, itemCounter + 1, 20);
-                childElements[itemCounter++] = new JsonValueItem("", this._parseNumber(json, i, isSuccess));
-            } else if (json[i] == '"') {
-                ArrayResize(childElements, itemCounter + 1, 20);
-                childElements[itemCounter++] = new JsonValueItem("", this._parseString(json, i, isSuccess));
-            } else if (json[i] == 'n' || json[i] == 'N') {
-                ArrayResize(childElements, itemCounter + 1, 20);
-                childElements[itemCounter++] = new JsonValueItem("", this._parseNull(json, i, isSuccess));
-            } else if (json[i] == 't' || json[i] == 'f') {
-                ArrayResize(childElements, itemCounter + 1, 20);
-                childElements[itemCounter++] = new JsonValueItem("", this._parseBoolean(json, i, isSuccess));
-            } else if (json[i] == '{') {
-                ArrayResize(childElements, itemCounter + 1, 20);
-                childElements[itemCounter++] = new JsonValueItem("", this._parseObject(json, i, isSuccess));
-            }
-            if (!isSuccess) break;
-
-            this._skipWhitespace(json, i);
-            if (json[i] == ',') {
-                i++; // Пропускаем запятую
-            } else if (json[i] == ']') {
-                i++;
-                break; // Конец массива
-            } else {
-                isSuccess = false;
-                break;
-            }
-        }
-        
-        return new JsonValueItem(key, childElements);
+    static JSON::Array* _parseArray(const string &json, int &i, bool &isSuccess) {
+        JSON::Array* childObject = new JSON::Array();
+        JSON::_parseJSONArray(json, i, isSuccess, childObject);
+        return childObject;
     }
 
     void _clearResources() {
@@ -385,9 +411,7 @@ private:
             double doubleValue;
             bool booleanValue;
             JSON* objectValue;
-
-            int arrayLenght;
-            JsonValueItem* arrayValue[];
+            JSON::Array* arrayValue;
 
             JsonValueItem(string k, string value): key(k), valueType(JSONStringType), stringValue(value) {};
             JsonValueItem(string k, int value): key(k), valueType(JSONNumberType), doubleValue(double(value)) {};
@@ -395,42 +419,24 @@ private:
             JsonValueItem(string k, double value): key(k), valueType(JSONNumberType), doubleValue(value) {};
             JsonValueItem(string k, bool value): key(k), valueType(JSONBoolType), booleanValue(value) {};
             JsonValueItem(string k, JSON* value): key(k), valueType(JSONObjetType), objectValue(value) {};
-            JsonValueItem(string k, JsonValueItem* &value[]): key(k), valueType(JSONArrayType), arrayLenght(ArraySize(value)) {
-                ArrayResize(this.arrayValue, this.arrayLenght);
-                for (int i = 0; i < this.arrayLenght; i++) {
-                    this.arrayValue[i] = value[i];
-                }
-            }
-            template <typename T>
-            JsonValueItem(string k, T &value[]): key(k), valueType(JSONArrayType), arrayLenght(ArraySize(value)) {
-                ArrayResize(this.arrayValue, this.arrayLenght);
-                for (int i = 0; i < this.arrayLenght; i++) {
-                    this.arrayValue[i] = new JsonValueItem(key, value[i]);
-                }
-            }
+            JsonValueItem(string k, JSON::Array* value): key(k), valueType(JSONArrayType), arrayValue(value) {};
 
             string toString() const {
                 if (this.valueType == JSONBoolType) return string(this.booleanValue);
                 if (this.valueType == JSONNumberType) return string(this.doubleValue);
+                if (this.valueType == JSONObjetType) return this.objectValue.toString();
+                if (this.valueType == JSONArrayType) return this.arrayValue.toString();
                 if (this.valueType == JSONStringType) {
                     string copy = this.stringValue;
                     StringReplace(copy, "\"","\\\"");
                     return "\"" + copy + "\"";
-                };
-                if (this.valueType == JSONObjetType) return this.objectValue.toString();
-
-                string result = "";
-                for (int i = 0; i < this.arrayLenght; i++) {
-                    result += this.arrayValue[i].toString() + (i < this.arrayLenght - 1 ? ", " : "");
                 }
-                return "[" + result + "]";
+                return ""; // JSONUndefinedType never returns
             }
 
             ~JsonValueItem() {
                 if (this.valueType == JSONObjetType) delete this.objectValue;
-                if (this.valueType == JSONArrayType) {
-                    for (int i = 0; i < ArraySize(this.arrayValue); i++) delete this.arrayValue[i];
-                }
+                if (this.valueType == JSONArrayType) delete this.arrayValue;
             }
     };
 };
