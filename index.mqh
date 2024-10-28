@@ -359,7 +359,7 @@ private:
             this._skipWhitespace(json, i);
             if (json[i] == ',') {
                 i++; // Пропускаем запятую
-            } if (json[i] == ']') {
+            } else if (json[i] == ']') {
                 i++;
                 break; // Конец массива
             } else {
