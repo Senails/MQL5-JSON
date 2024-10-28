@@ -97,7 +97,7 @@ public:
         this._clearResources();
     }
 private:
-    class JsonValueItem;   
+    class JsonValueItem;
     enum JSONValueItemTypes { JSONStringType, JSONNumberType, JSONBoolType, JSONObjetType, JSONArrayType, JSONUndefinedType };
 
     const JsonValueItem* jsonValueItemsArray[];
