@@ -19,7 +19,6 @@ public:
 
         JSON::Object* setProperty(string key, string value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
         JSON::Object* setProperty(string key, int value)                { return this._setProperty(key, new JsonValueItem(key, value)); }
-        JSON::Object* setProperty(string key, long value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
         JSON::Object* setProperty(string key, double value)             { return this._setProperty(key, new JsonValueItem(key, value)); }
         JSON::Object* setProperty(string key, bool value)               { return this._setProperty(key, new JsonValueItem(key, value)); }
         JSON::Object* setProperty(string key, JSON::Object* value)      { return this._setProperty(key, new JsonValueItem(key, value)); }
@@ -130,7 +129,6 @@ public:
 
         Array* add(string value)             { return this._add(new JsonValueItem("", value)); }
         Array* add(int value)                { return this._add(new JsonValueItem("", value)); }
-        Array* add(long value)               { return this._add(new JsonValueItem("", value)); }
         Array* add(double value)             { return this._add(new JsonValueItem("", value)); }
         Array* add(bool value)               { return this._add(new JsonValueItem("", value)); }
         Array* add(JSON::Object* value)      { return this._add(new JsonValueItem("", value)); }
@@ -423,8 +421,7 @@ private:
             JSON::Array* arrayValue;
 
             JsonValueItem(string k, string value): key(k), valueType(JSONStringType), stringValue(value) {};
-            JsonValueItem(string k, int value): key(k), valueType(JSONNumberType), doubleValue(double(value)) {};
-            JsonValueItem(string k, long value): key(k), valueType(JSONNumberType), doubleValue(double(value)) {};
+            JsonValueItem(string k, int value): key(k), valueType(JSONNumberType), doubleValue(value) {};
             JsonValueItem(string k, double value): key(k), valueType(JSONNumberType), doubleValue(value) {};
             JsonValueItem(string k, bool value): key(k), valueType(JSONBoolType), booleanValue(value) {};
             JsonValueItem(string k, JSON::Object* value): key(k), valueType(JSONObjetType), objectValue(value) {};

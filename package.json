@@ -1,6 +1,6 @@
 {
   "name": "mql5-json",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "JSON parcing and serialization for MQL5 lang",
   "main": "index.mqh",
   "scripts": {},
