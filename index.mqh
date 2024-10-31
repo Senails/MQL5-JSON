@@ -127,12 +127,12 @@ public:
             if (!isSuccess) this._clearResources();
         };
 
-        Array* add(string value)             { return this._add(new JsonValueItem("", value)); }
-        Array* add(int value)                { return this._add(new JsonValueItem("", value)); }
-        Array* add(double value)             { return this._add(new JsonValueItem("", value)); }
-        Array* add(bool value)               { return this._add(new JsonValueItem("", value)); }
-        Array* add(JSON::Object* value)      { return this._add(new JsonValueItem("", value)); }
-        Array* add(JSON::Array* value)       { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(string value)             { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(int value)                { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(double value)             { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(bool value)               { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(JSON::Object* value)      { return this._add(new JsonValueItem("", value)); }
+        JSON::Array* add(JSON::Array* value)       { return this._add(new JsonValueItem("", value)); }
 
         bool isBoolean(int index) const      { return this._getPropertyType(index) == JSONBoolType; }
         bool isNumber(int index) const       { return this._getPropertyType(index) == JSONNumberType; }
@@ -141,26 +141,31 @@ public:
         bool isArray(int index) const        { return this._getPropertyType(index) == JSONArrayType; }
 
         string getString(int index) const {
+            if (index < 0 || index > ArraySize(this._jsonValueItemsArray)) return "";
             const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONStringType) return "";
             return item.stringValue;
         }
         double getNumber(int index) const {
+            if (index < 0 || index > ArraySize(this._jsonValueItemsArray)) return 0.0;
             const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONNumberType) return 0.0;
             return item.doubleValue;
         }
         bool getBoolean(int index) const {
+            if (index < 0 || index > ArraySize(this._jsonValueItemsArray)) return false;
             const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONBoolType) return false;
             return item.booleanValue;
         }
         JSON::Object* getObject(int index) const {
+            if (index < 0 || index > ArraySize(this._jsonValueItemsArray)) return NULL;
             const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONObjetType) return NULL;
             return item.objectValue;
         }
         JSON::Array* getArray(int index) const {
+            if (index < 0 || index > ArraySize(this._jsonValueItemsArray)) return NULL;
             const JsonValueItem* item = this._jsonValueItemsArray[index];
             if (item == NULL || item.valueType != JSONArrayType) return NULL;
             return item.arrayValue;
@@ -185,7 +190,7 @@ public:
     private:
         JsonValueItem* _jsonValueItemsArray[];
 
-        Array* _add(JsonValueItem* elem) {
+        JSON::Array* _add(JsonValueItem* elem) {
             int arraySize = ArraySize(this._jsonValueItemsArray);
             ArrayResize(this._jsonValueItemsArray, arraySize + 1, 10);
             _jsonValueItemsArray[arraySize] = elem;
